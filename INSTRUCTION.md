@@ -1,72 +1,43 @@
-# Validation Instructions
+#Deployment Instructions
+## 1. Deploy all resourcesRun the bootstrap script:
+```bashbash bootstrap.sh```
 
-## Prerequisites
-- `kind` (>= 0.20) installed
-- `kubectl` installed
-- `Docker` installed
+## 2. Verify MySQL StatefulSetCheck pods in mysql namespace:
 
-## Deployment
+```bashkubectl get pods -n mysql```
 
-```bash
-chmod +x bootstrap.sh
-./bootstrap.sh
+_**Expected:
 
+**_mysql-0
 
-## StatefulSet Check
+\mysql-1 
 
+\mysql-2Check service:
 
-```bash
-# View all resources in the mysql namespace
-kubectl get all -n mysql
+```bashkubectl get svc -n mysql```
 
-# Verify that 3 replicas are Running
-kubectl get pods -n mysql
-# Expected Result:
-# NAME READY STATUS RESTARTS AGE
-# mysql-0 1/1 Running 0 ...
-# mysql-1 1/1 Running 0 ...
-# mysql-2 1/1 Running 0 ...
-# Check PVC
-kubectl get pvc -n mysql
-# Check headless Service
-kubectl get svc -n mysql
-```
+_**Expected:
 
-## Check connectivity to DB
+**_mysql (ClusterIP: None)
 
-```bash
-# Connect to mysql-0
-kubectl exec -it mysql-0 -n mysql -- mysql -u root -p
-# Enter rootpassword
+## 3. Verify todoapp DeploymentCheck pods:
 
-# Check the DB
-SHOW DATABASES;
-USE tododb;
-SHOW TABLES;
-```
+```bashkubectl get pods -n todoapp```
 
-## Verify the application
+Check services:
 
-```bash
-# Check the application pods
-kubectl get pods
-# View logs
-kubectl logs deployment/todolist
+```bashkubectl get svc -n todoapp```
 
-# Port-forward for local test
-kubectl port-forward deployment/todolist 8000:8000
-# Open http://localhost:8000
-```
+## 4. Verify application connectivityForward port:
 
-## Verify Probes
+```bashkubectl -n todoapp port-forward svc/todoapp-service 8080:80```
 
-```bash
-# View events and probe status
-kubectl describe pod mysql-0 -n mysql | grep -A5 "Liveness\|Readiness"
-```
+Open in browser:http://localhost:8080
 
-## Cleanup
+## 5. Verify environment variables inside pod
+```bashkubectl exec -it <todoapp-pod-name> -n todoapp -- printenv | grep DB```
 
-```bash
-kind delete cluster
-```
+_**Expected variables:**_DB_NAME \DB_USER \DB_PASSWORD \DB_HOST
+
+## 6. Verify MySQL initialization
+```bashkubectl logs mysql-0 -n mysql```
