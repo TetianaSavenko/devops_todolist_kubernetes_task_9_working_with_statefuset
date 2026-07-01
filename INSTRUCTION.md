@@ -10,9 +10,10 @@
 ```bash
 chmod +x bootstrap.sh
 ./bootstrap.sh
-```
+
 
 ## StatefulSet Check
+
 
 ```bash
 # View all resources in the mysql namespace
